@@ -19,6 +19,9 @@
 import pygame, sys, random
 from pygame.locals import *
 
+version  = 1
+filename = "custom_snakes.py"
+
 width, height 	= 600,400	#Width and height of the window
 boxsize 		= 10		#How big the "pixels" will be
 speed 			= 40		#Speed of the game, less is more
@@ -34,7 +37,7 @@ Arguments are used like this: <argument>=<value>  IMPORTANT: no space between th
 	help		:: What you're reading right now
 
 -EXAMPLE:
-	$ python custom_snakes.py windowsize=800x600 speed=20 boxsize=20 bonusgrowth=10
+	$ python """+filename+""" windowsize=800x600 speed=20 boxsize=20 bonusgrowth=10
 """
 
 
@@ -77,11 +80,14 @@ for arg in sys.argv[1:]:
 	elif arg == "help":
 		print helpstr
 		sys.exit()
+	elif arg == "version":
+		print version
+		sys.exit()
 	else:
 		invalid_arg(arg)
 
 if not used_arguments:
-	print "Tips: run with the argument \"help\" to see options\n\tlike this: $ python snakes.py help"
+	print "Tips: run with the argument \"help\" to see options\n\tlike this: $ python "+filename+" help"
 
 if 0 < max(width % boxsize, height % boxsize):
 	print "Warning: width and height should both be a multiples of boxsize"

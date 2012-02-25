@@ -27,16 +27,23 @@ boxsize 		= 10		#How big the "pixels" will be
 speed 			= 40		#Speed of the game, less is more
 bonusgrowth 	= 5			#How many boxes the snake will grow when he eats a fruit/bonus/award
 
-helpstr = """
-Arguments are used like this: <argument>=<value>  IMPORTANT: no space between the "=" and the argument/value
--ARGUMENTS
-	windowsize	:: how big the window should be. valid input value is <width>x<height>.  DEFAULT: """+str(width)+"x"+str(height)+"""
-	speed		:: How fast the game should run, smaller is faster. (20 is very fast, 200 is very slow, you do the math) DEFAULT: """+str(speed)+"""
-	boxsize		:: Essentially how small the game will be, a small value will give a little snake and vice versa. DEFAULT: """+str(boxsize)+"""
-	bonusgrowth	:: How nutritious the fruit will be. In other words, how many boxes the snake will grow after eating the fruit. DEFAULT: """+str(bonusgrowth)+"""
-	help		:: What you're reading right now
+helpstr = """Arguments are used like this: <argument>=<value>
+Use no space between the "=" and the argument/value
+- ARGUMENTS
+    windowsize  :: how big the window should be. DEFAULT: """+str(width)+"x"+str(height)+"""
+"""+"-"*80+"""
+    speed       :: How fast the game should run, smaller is faster.
+                :: (20 is very fast, 200 is very slow, you do the math) DEFAULT: """+str(speed)+"""
+"""+"-"*80+"""
+    boxsize     :: Essentially how small the game will be, a small value will
+                :: give a little snake and vice versa. DEFAULT: """+str(boxsize)+"""
+"""+"-"*80+"""
+    bonusgrowth :: How nutritious the fruit will be. In other words, how many boxes 
+                :: the snake will grow after eating the fruit. DEFAULT: """+str(bonusgrowth)+"""
+"""+"-"*80+"""
+    help        :: What you're reading right now
 
--EXAMPLE:
+- EXAMPLE:
 	$ python """+filename+""" windowsize=800x600 speed=20 boxsize=20 bonusgrowth=10
 """
 
@@ -78,7 +85,7 @@ for arg in sys.argv[1:]:
 		except ValueError:
 			invalid_arg(arg)
 	elif arg == "help":
-		print helpstr
+		print helpstr,
 		sys.exit()
 	elif arg == "version":
 		print version

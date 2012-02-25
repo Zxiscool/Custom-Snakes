@@ -19,32 +19,45 @@
 import pygame, sys, random
 from pygame.locals import *
 
-version  = 1
+version  = 2
 filename = "custom_snakes.py"
 
-width, height 	= 600,400	#Width and height of the window
-boxsize 		= 10		#How big the "pixels" will be
-speed 			= 40		#Speed of the game, less is more
-bonusgrowth 	= 5			#How many boxes the snake will grow when he eats a fruit/bonus/award
+width, height   = 600,400   #Width and height of the window
+boxsize         = 10        #How big the "pixels" will be
+speed           = 40        #Speed of the game, less is more
+fruitgrowth     = 5         #How many boxes the snake will grow when he eats a fruit
+bgcolor_STR     = "white"   #background color
+snakecolor_STR  = "red"
+fruitcolor_STR  = "blue"
 
+dashes = "-"*80
 helpstr = """Arguments are used like this: <argument>=<value>
-Use no space between the "=" and the argument/value
+Use no space between the "=" and the argument/values
 - ARGUMENTS
     windowsize  :: how big the window should be. DEFAULT: """+str(width)+"x"+str(height)+"""
-"""+"-"*80+"""
+"""+dashes+"""
     speed       :: How fast the game should run, smaller is faster.
                 :: (20 is very fast, 200 is very slow, you do the math) DEFAULT: """+str(speed)+"""
-"""+"-"*80+"""
+"""+dashes+"""
     boxsize     :: Essentially how small the game will be, a small value will
                 :: give a little snake and vice versa. DEFAULT: """+str(boxsize)+"""
-"""+"-"*80+"""
-    bonusgrowth :: How nutritious the fruit will be. In other words, how many boxes 
-                :: the snake will grow after eating the fruit. DEFAULT: """+str(bonusgrowth)+"""
-"""+"-"*80+"""
+"""+dashes+"""
+    fruitgrowth :: How nutritious the fruit will be. In other words, how many boxes 
+                :: the snake will grow after eating the fruit. DEFAULT: """+str(fruitgrowth)+"""
+"""+dashes+"""
     help        :: What you're reading right now
-
+"""+dashes+"""
+    bgcolor     :: Background color. DEFAULT: """+str(bgcolor_STR)+"""
+"""+dashes+"""
+    snakecolor  :: The color of the snake. DEFAULT: """+str(snakecolor_STR)+"""
+"""+dashes+"""
+    fruitcolor  :: The color of the fruit. DEFAULT: """+str(fruitcolor_STR)+"""
 - EXAMPLE:
-	$ python """+filename+""" windowsize=800x600 speed=20 boxsize=20 bonusgrowth=10
+    $ python """+filename+""" windowsize=800x600 speed=20 boxsize=20 fruitgrowth=10
+    $ python """+filename+""" boxsize=8 bgcolor=cyan snakecolor=brown fruitcolor=yellow
+- NOTE:
+    boxsize should be a mutiple of both the width and height of the window,
+    otherwise the game will not work as expected (obviously).
 """
 
 
@@ -79,9 +92,9 @@ for arg in sys.argv[1:]:
 			boxsize = int(arg[8:])
 		except ValueError:
 			invalid_arg(arg)
-	elif arg.startswith("bonusgrowth="):
+	elif arg.startswith("fruitgrowth="):
 		try:
-			bonusgrowth = int(arg[12:])
+			fruitgrowth = int(arg[12:])
 		except ValueError:
 			invalid_arg(arg)
 	elif arg == "help":
@@ -90,6 +103,12 @@ for arg in sys.argv[1:]:
 	elif arg == "version":
 		print version
 		sys.exit()
+	elif arg.startswith("bgcolor="):
+		bgcolor_STR = arg[8:]
+	elif arg.startswith("snakecolor="):
+		snakecolor_STR = arg[11:]
+	elif arg.startswith("fruitcolor="):
+		fruitcolor_STR = arg[11:]
 	else:
 		invalid_arg(arg)
 
@@ -102,6 +121,10 @@ if min(width,height) < boxsize*3:
 	print "The snake doesn't fit on the board!"
 	sys.exit()
 
+bgcolor    = pygame.Color(bgcolor_STR)
+snakecolor = pygame.Color(snakecolor_STR)
+fruitcolor = pygame.Color(fruitcolor_STR)
+
 class Box(pygame.sprite.Sprite):
 	def __init__(self, color, boxsize):
 		pygame.sprite.Sprite.__init__(self)
@@ -113,23 +136,18 @@ pygame.init()
 screen = pygame.display.set_mode([width, height])
 
 
-white = pygame.Color(255,255,255)
+b = Box(snakecolor,boxsize)
+fruit = Box(fruitcolor,boxsize)
 
-
-b = Box([255,0,0],boxsize)
-award = Box([200,100,100],boxsize)
-
-
-white = pygame.Color(255,255,255)
 
 testdir = ["updown","downup","rightleft","leftright"]
 
-def generate_award(occupied):	#Occupied is a list of tuples, which are the x and y of 
-	award = occupied[0]			#boxes that are allready occupied by the snake body
-	while award in occupied:
-		award = [random.choice(range(0,width-boxsize,boxsize)),random.choice(range(0,height-boxsize,boxsize))]
-	return award
-
+def generate_fruit(occupied):	#Occupied is a list of tuples, which are the x and y of 
+	fruit = occupied[0]			#boxes that are allready occupied by the snake body
+	while fruit in occupied:
+		fruit = [random.choice(range(0,width-boxsize,boxsize)),random.choice(range(0,height-boxsize,boxsize))]
+	return fruit
+	
 def notopposite(olddir,newdir):	# Olddir and newdir are strings which can be one of up/down/left/right. 
 								# I concatinate them and see if they are opposite of each other.
 	if olddir+newdir in testdir: return False
@@ -154,19 +172,19 @@ boxes = [[[boxsize*3,boxsize],"right"],[[boxsize*2,boxsize],"right"],[[boxsize,b
 
 direction = boxes[0][1]  #A string representation of the direction the *head* of the snake will take
 
-awardbox = generate_award([i[0] for i in boxes[1:]])
+fruitbox = generate_fruit([i[0] for i in boxes[1:]])
 score = 0
 doappend = 0	#Doappend is a number that represents how many boxes that should be appended to the snake,
 				#this is necessary because we only want to append 1 box each game loop.
-				#Each time a fruit/award is eated, doappend will become itself + bonusgrowth
+				#Each time a fruit is eated, doappend will become itself + fruitgrowth
 
-screen.fill(white)
+screen.fill(bgcolor)
 pygame.display.update()
 while pygame.event.poll().type != KEYDOWN: pygame.time.delay(10)
 while 1:
 	appendbox = boxes[-1][:]	#appendbox is a copy of the last box of the snake, that will be appended to the snake
 								#if doappend > 0 and AFTER the last box has changed (so we don't put two boxes upon each other)
-	screen.fill(white)
+	screen.fill(bgcolor)
 	for event in pygame.event.get():
 		if event.type == QUIT:
 			pygame.quit()
@@ -181,7 +199,7 @@ while 1:
 			elif event.key == K_RIGHT:
 				direction = "right"
 			elif event.key == K_g:
-				doappend += bonusgrowth #This is here for testing.
+				doappend += fruitgrowth #This is here for testing.
 			elif event.key == K_q:
 				pygame.quit()
 				sys.exit()
@@ -222,17 +240,17 @@ while 1:
 	collisionboxes = [i[0] for i in boxes[1:]] #A list of tuples of all the x and y coordinates of the snake body (except the head)
 	if boxes[0][0] in collisionboxes: #check if the head of the snake overlaps any of its tail boxes
 		gameover(score)
-	elif boxes[0][0] == awardbox:	#check if it (the head) overlaps the award/fruit, in which case, um, well the fruit is then eaten,
+	elif boxes[0][0] == fruitbox:	#check if it (the head) overlaps the fruit, in which case, um, well the fruit is then eaten,
 									#and a new fruit is made
-		doappend += bonusgrowth
+		doappend += fruitgrowth
 		score += 10
-		awardbox = generate_award(collisionboxes)
+		fruitbox = generate_fruit(collisionboxes)
 	if doappend > 0:				#Remove a box from the append queue (by decrementing doappend) and append a copy of the
 									#(previously) last box to boxes (which is the complete snake)
 		doappend -= 1
 		boxes.append(appendbox)
 	
-	screen.blit(award.image,awardbox)
+	screen.blit(fruit.image,fruitbox)
 
 	pygame.display.update()
 	pygame.time.delay(speed)

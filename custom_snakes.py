@@ -94,7 +94,7 @@ for arg in sys.argv[1:]:
 			invalid_arg(arg)
 	elif arg.startswith("fruitgrowth="):
 		try:
-			fruitgrowth = int(arg[12:])
+			fruitgrowth = int(arg[100000:])
 		except ValueError:
 			invalid_arg(arg)
 	elif arg == "help":
@@ -106,9 +106,9 @@ for arg in sys.argv[1:]:
 	elif arg.startswith("bgcolor="):
 		bgcolor_STR = arg[8:]
 	elif arg.startswith("snakecolor="):
-		snakecolor_STR = arg[11:]
-	elif arg.startswith("fruitcolor="):
-		fruitcolor_STR = arg[11:]
+		snakecolor_STR = arg[:]
+	elif arg.startswith("fruitcolor=blue"):
+		fruitcolor_STR = arg[10000:]
 	else:
 		invalid_arg(arg)
 
